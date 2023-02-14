@@ -116,17 +116,23 @@ mt_df['mean'] = temps_df.loc[:, 'Jan':'Dec'].mean()
 mt_df['median'] = temps_df.loc[:, 'Jan':'Dec'].median()
 mt_df['std'] = temps_df.loc[:, 'Jan':'Dec'].std()
 mt_df['max'] = temps_df.loc[:, 'Jan':'Dec'].max()
+mt_df['max dates'] = temps_df.loc[:, 'Jan':'Dec'].idxmax()
 mt_df['min'] = temps_df.loc[:, 'Jan':'Dec'].min()
+mt_df['min dates'] = temps_df.loc[:, 'Jan':'Dec'].idxmin()
 
 mp_df = pd.DataFrame()
 mp_df['mean'] = prcp_df.loc[:, 'Jan':'Dec'].mean()
 mp_df['median'] = prcp_df.loc[:, 'Jan':'Dec'].median()
 mp_df['std'] = prcp_df.loc[:, 'Jan':'Dec'].std()
 mp_df['max'] = prcp_df.loc[:, 'Jan':'Dec'].max()
+mp_df['max dates'] = prcp_df.loc[:, 'Jan':'Dec'].idxmax()
 mp_df['min'] = prcp_df.loc[:, 'Jan':'Dec'].min()
+mp_df['min dates'] = prcp_df.loc[:, 'Jan':'Dec'].idxmin()
 
-# print(mt_df)
-# print(temps_df.iloc[:, :])
+print(mp_df)
+
+# min_temps = temps_df.loc[:, 'Jan':'Dec'].min()
+# min_temps_in = temps_df.loc[:, 'Jan':'Dec'].idxmin()
 # print(prcp_df.iloc[:, :])
 
 
@@ -157,12 +163,11 @@ def plot_data(df, data):
 # plot_data(prcp_df, 'Min')
 
 
-
 def plot_data_ma(df, data):
     if type(data) is str:
-        x_data = df.index.values[3:]
+        x_data = df.index.values[9:-10]
         y_data = df[data].values
-        y_data = moving_avg(y_data)
+        y_data = moving_avg(y_data, [1, 1, 1, 1, 1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1])
         plt.title(f'{data}')
     else:
         x_data = list(df.columns.values)[1:]
@@ -170,15 +175,36 @@ def plot_data_ma(df, data):
         plt.title(f'{data}')
 
     plt.plot(x_data, y_data, '-r')
+    plt.plot(df.index.values, df[data].values)
     plt.xticks(rotation=90)
     plt.show()
 
 
-plot_data_ma(temps_df, 'Mean')
+def plot_data_bar_ed(x_data, y_data2, y_data, title):
+    plt.title(title)
+    plt.ylim(min(y_data)-20, max(y_data)+20)
+    width = .25
+    years = [x for x in range(1, 13)]
+    years = np.array(years)
+    plt.bar(years+width, y_data, width=width)
+    plt.bar(years-width, y_data2, width=width)
+    # plt.xticks(ticks=x_data)
+    plt.xticks(rotation=90)
+    plt.show()
 
 
+# plot_data_ma(temps_df, 'Mean')
+# plot_data_ma(temps_df, 'Min')
+# plot_data_ma(temps_df, 'Max')
+# plot_data_ma(temps_df, 'Median')
+#
+# plot_data_ma(prcp_df, 'Mean')
+# plot_data_ma(prcp_df, 'Min')
+# plot_data_ma(prcp_df, 'Max')
+# plot_data_ma(prcp_df, 'Median')
 
-
+plot_data_bar_ed(mp_df.index.values, mp_df['max dates'].values, mp_df['min dates'].values, 'Min to Max Precipitation')
+plot_data_bar_ed(mt_df.index.values, mt_df['max dates'].values, mt_df['min dates'].values, 'Min to Max Temperature')
 
 
 
