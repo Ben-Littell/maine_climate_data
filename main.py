@@ -2,13 +2,14 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+import func
 
 # MAKE DATAFRAMES
 
 temps_df = pd.read_csv('temp.csv')
 temps_df.set_index(temps_df['Date'], inplace=True)
 temps_df = temps_df.drop('Date', axis=1)
-prcp_df = pd.read_csv('prcp.csv')
+prcp_df = pd.read_csv('allmonths_pcp.csv')
 prcp_df.set_index(prcp_df["Date"], inplace=True)
 prcp_df = prcp_df.drop('Date', axis=1)
 
@@ -129,7 +130,7 @@ mp_df['max dates'] = prcp_df.loc[:, 'Jan':'Dec'].idxmax()
 mp_df['min'] = prcp_df.loc[:, 'Jan':'Dec'].min()
 mp_df['min dates'] = prcp_df.loc[:, 'Jan':'Dec'].idxmin()
 
-print(mp_df)
+# print(mp_df)
 
 # min_temps = temps_df.loc[:, 'Jan':'Dec'].min()
 # min_temps_in = temps_df.loc[:, 'Jan':'Dec'].idxmin()
@@ -167,7 +168,7 @@ def plot_data_ma(df, data):
     if type(data) is str:
         x_data = df.index.values[9:-10]
         y_data = df[data].values
-        y_data = moving_avg(y_data, [1, 1, 1, 1, 1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1])
+        y_data = moving_avg(y_data, [1 for i in range(20)])
         plt.title(f'{data}')
     else:
         x_data = list(df.columns.values)[1:]
@@ -182,7 +183,7 @@ def plot_data_ma(df, data):
 
 def plot_data_bar_ed(x_data, y_data2, y_data, title):
     plt.title(title)
-    plt.ylim(min(y_data)-20, max(y_data)+20)
+    plt.ylim(min(y_data)-30, max(y_data)+30)
     width = .25
     years = [x for x in range(1, 13)]
     years = np.array(years)
@@ -193,18 +194,54 @@ def plot_data_bar_ed(x_data, y_data2, y_data, title):
     plt.show()
 
 
-# plot_data_ma(temps_df, 'Mean')
+plot_data_ma(temps_df, 'Mean')
 # plot_data_ma(temps_df, 'Min')
 # plot_data_ma(temps_df, 'Max')
 # plot_data_ma(temps_df, 'Median')
 #
-# plot_data_ma(prcp_df, 'Mean')
+plot_data_ma(prcp_df, 'Mean')
 # plot_data_ma(prcp_df, 'Min')
 # plot_data_ma(prcp_df, 'Max')
 # plot_data_ma(prcp_df, 'Median')
 
 plot_data_bar_ed(mp_df.index.values, mp_df['max dates'].values, mp_df['min dates'].values, 'Min to Max Precipitation')
 plot_data_bar_ed(mt_df.index.values, mt_df['max dates'].values, mt_df['min dates'].values, 'Min to Max Temperature')
+temps_ma = moving_avg(temps_df.loc[:, 'Mean'].values.tolist(), [1 for i in range(20)])
+prcp_ma = moving_avg(prcp_df.loc[:, 'Mean'].values.tolist(), [1 for k in range(20)])
 
+years_l1 = [i+.5 for i in range(1904, 1943)]
+temps_l1 = temps_ma[:len(years_l1)]
 
+years_l2 = [i+.5 for i in range(1943, 1980)]
+temps_l2 = temps_ma[len(years_l1):len(years_l1)+len(years_l2)]
+# print(len(years_l2), len(temps_l2))
+
+years_l3 = [i+.5 for i in range(1980, 2013)]
+temps_l3 = temps_ma[len(years_l1)+len(years_l2)-1:]
+
+prcp_l3 = prcp_ma[len(years_l1)+len(years_l2)-1:]
+# print(len(years_l3), len(temps_l3))
+
+#
+# temps_l2 = temps_df.loc[1943:1979, 'Mean'].values.tolist()
+# years_l2 = temps_df.loc[1943:1979].index.tolist()
+#
+# temps_l3 = temps_df.loc[1980:, 'Mean'].values.tolist()
+# years_l3 = temps_df.loc[1980:2002].index.tolist()
+
+lst1 = func.least_sqrs(years_l3, temps_l3)
+# print(lst1)
+x1 = 2025
+x2 = 2030
+x3 = 2035
+es_2025 = lst1[0]*x1+lst1[1]
+es_2030 = lst1[0]*x2+lst1[1]
+es_2035 = lst1[0]*x3+lst1[1]
+print(es_2025, es_2030, es_2035)
+cor_l1 = func.corcoeff(years_l1, temps_l1)
+cor_l2 = func.corcoeff(years_l2, temps_l2)
+cor_l3 = func.corcoeff(years_l3, temps_l3)
+print(cor_l1, cor_l2, cor_l3)
+cor_p_t = func.corcoeff(temps_l3, prcp_l3)
+print(cor_p_t)
 
